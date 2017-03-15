@@ -8,7 +8,7 @@
 href="https://twitter.com/jakevdp/status/841777088088559616">March 14, 2017</a></blockquote>
 
 All it does is ensure that the current conda env is active when you run `%conda`,
-so that `%conda install packages` should always go in the kernel envs.
+so that `%conda install packages` should always go in the kernel env.
 
 Install:
 
@@ -22,3 +22,6 @@ Use:
 
     %conda install packages
 
+which actually calls
+
+    !conda install -p {sys.prefix} packages
