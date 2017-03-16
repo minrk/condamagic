@@ -23,6 +23,8 @@ ENV_COMMANDS = {
     'upgrade',
 }
 
+YES_COMMANDS = ENV_COMMANDS.difference({'list'})
+
 def conda(line):
     """Call conda with the current environment
 
@@ -39,12 +41,16 @@ def conda(line):
         # not one of our env-specific commands
         _ip.system('conda ' + line)
         return
+    inserts = []
     # add `-p ${sys.prefix}` if no `--path` or `--name` arg present
-    prefix_arg = ''
     if not any(env_arg in args for env_arg in ['-p', '--prefix', '-n', '--name']):
-        prefix_arg = '-p %s' % pipes.quote(prefix)
-    print(' '.join(['conda', cmd, prefix_arg] + rest))
-    _ip.system(' '.join(['conda', cmd, prefix_arg] + rest))
+        inserts.append('-p %s' % pipes.quote(prefix))
+    # add `-y` if in a kernel, where subprocesses can't ask for confirmation
+    if cmd in YES_COMMANDS and getattr(_ip, 'kernel', None) is not None:
+        inserts.append('-y')
+    line = ' '.join(['conda', cmd] + inserts + rest)
+    # print(line)
+    _ip.system(line)
 
 def load_ipython_extension(ip):
     global _ip
