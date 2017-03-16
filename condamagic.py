@@ -42,8 +42,10 @@ def conda(line):
     """
     prefix = sys.prefix
     args = shlex.split(line)
-    cmd, *rest = line.split(None, 1)
-    
+    split_line = line.split(None, 1)
+    cmd = split_line[0]
+    rest = split_line[1:]
+
     if cmd not in ENV_COMMANDS:
         # not one of our env-specific commands
         _ip.system('conda ' + line)
