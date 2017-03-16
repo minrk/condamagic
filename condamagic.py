@@ -9,6 +9,7 @@ Use:
     %conda install packages
 """
 
+import os
 import pipes
 import shlex
 import sys
@@ -24,6 +25,12 @@ ENV_COMMANDS = {
 }
 
 YES_COMMANDS = ENV_COMMANDS.difference({'list'})
+
+ENV_FLAGS = {'-p', '--prefix', '-n', '--name'}
+
+def _is_conda_env(prefix):
+    """Is the given prefix a conda env?"""
+    return os.path.exists(os.path.join(prefix, 'conda-meta'))
 
 def conda(line):
     """Call conda with the current environment
@@ -43,7 +50,8 @@ def conda(line):
         return
     inserts = []
     # add `-p ${sys.prefix}` if no `--path` or `--name` arg present
-    if not any(env_arg in args for env_arg in ['-p', '--prefix', '-n', '--name']):
+    # AND current sys.prefix is a conda env
+    if _is_conda_env(prefix) and not set(args).intersection(ENV_FLAGS):
         inserts.append('-p %s' % pipes.quote(prefix))
     # add `-y` if in a kernel, where subprocesses can't ask for confirmation
     if cmd in YES_COMMANDS and getattr(_ip, 'kernel', None) is not None:
